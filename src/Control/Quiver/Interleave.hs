@@ -22,9 +22,13 @@ import Data.List     (sortBy)
 --------------------------------------------------------------------------------
 
 -- | Interleave the elements of the provided producers such that the
--- result consists of the values from all of them sorted by the
+-- result consists of the values from all of them merged in by the
 -- provided comparison function.
-spinterleave :: (Monad f) => (b -> b -> Ordering) -> [P a a' b () f ()] -> P a a' b () f ()
+--
+-- That is, if each provided Quiver returns a sequence of ordered
+-- elements, then this would be the same as obtaining all the elements
+-- and sorting them.
+spinterleave :: (Monad f) => (b -> b -> Ordering) -> [P a a' b () f e] -> P a a' b () f ()
 spinterleave cmp ps = do
   aps <- qlift (rights <$> mapM spnext ps)
   go aps
