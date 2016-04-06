@@ -30,9 +30,9 @@ library
 
   ghc-options:         -Wall
 
-test-suite properties
+test-suite interleave-tests
   type:                exitcode-stdio-1.0
-  main-is:             PropTests.hs
+  main-is:             Spec.hs
   build-depends:       quiver-interleave
                      , base
                      , quiver
