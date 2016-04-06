@@ -25,10 +25,16 @@ import Test.QuickCheck
 
 main :: IO ()
 main = hspec $
-  describe "interleave" $
+  describe "interleave" $ do
     prop "same as list-based" $
       forAllShrink orderedSubLists shrink $ \ass ->
         interleaveSort ass == sort (concat ass)
+    it "propagates errors" $
+      spIdentity (spinterleave compare [spevery [1,4,7]
+                                       ,spevery [2,5,8]
+                                       ,3 >:> spfailed "failed"]
+                  >->> spToList)
+        == (SPFailed "failed", [1,2,3] :: [Int]) -- The error and the values found before the error came up.
 
 spToList :: SQ a x f [a]
 spToList = spfoldr (:) []

@@ -12,10 +12,11 @@ module Control.Quiver.Interleave
   ( spinterleave
   ) where
 
-import Control.Quiver
 import Control.Quiver.Internal (P (..))
+import Control.Quiver.SP
 
-import Data.Either   (rights)
+import Data.Bool     (bool)
+import Data.Either   (partitionEithers)
 import Data.Function (on)
 import Data.List     (sortBy)
 
@@ -28,16 +29,26 @@ import Data.List     (sortBy)
 -- That is, if each provided Quiver returns a sequence of ordered
 -- elements, then this would be the same as obtaining all the elements
 -- and sorting them.
-spinterleave :: (Monad f) => (b -> b -> Ordering) -> [P a a' b () f e] -> P a a' b () f ()
+--
+-- If any provided Quiver results in anything except 'SPComplete' then
+-- entire stream halts, propagating the error.
+spinterleave :: (Monad f) => (b -> b -> Ordering) -> [P a a' b () f (SPResult e)] -> P a a' b () f (SPResult e)
 spinterleave cmp ps = do
-  aps <- qlift (rights <$> mapM spnext ps)
-  go aps
+  (errs, aps) <- qlift (partitionEithers <$> mapM spnext ps)
+  case filter isErr errs of
+    (e:_) -> deliver e
+    _     -> go aps
   where
-    go []  = return ()
+    go []  = spcomplete
     go aps = do let (a,p):aps' = sortBy (cmp`on`fst) aps
                 emit_ a
                 eap' <- qlift $ spnext p
-                go (either (const aps') (:aps') eap')
+                either (\e -> bool (go aps') (deliver e) (isErr e))
+                       (go . (:aps'))
+                       eap'
+
+    isErr SPComplete = False
+    isErr _          = True
 
 -- TODO: consider having it just return a Maybe
 spnext :: (Monad f) => P a a' b () f r -> f (Either r (b, P a a' b () f r))
