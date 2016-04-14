@@ -50,7 +50,6 @@ spinterleave cmp ps = do
     isErr SPComplete = False
     isErr _          = True
 
--- TODO: consider having it just return a Maybe
 spnext :: (Monad f) => P a a' b () f r -> f (Either r (b, P a a' b () f r))
 spnext = go
   where
