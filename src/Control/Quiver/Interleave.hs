@@ -39,13 +39,14 @@ spinterleave cmp ps = do
     (e:_) -> deliver e
     _     -> go aps
   where
-    go []  = spcomplete
-    go aps = do let (a,p):aps' = sortBy (cmp`on`fst) aps
-                emit_ a
-                eap' <- qlift $ spnext p
-                either (\e -> bool (go aps') (deliver e) (isErr e))
-                       (go . (:aps'))
-                       eap'
+    go []      = spcomplete
+    go [(a,p)] = a >:> p
+    go aps     = do let (a,p):aps' = sortBy (cmp`on`fst) aps
+                    emit_ a
+                    eap' <- qlift $ spnext p
+                    either (\e -> bool (go aps') (deliver e) (isErr e))
+                           (go . (:aps'))
+                           eap'
 
     isErr SPComplete = False
     isErr _          = True
