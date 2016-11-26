@@ -40,7 +40,7 @@ spToList :: SQ a x f [a]
 spToList = spfoldr (:) []
 
 spIdentity :: SQ a b Identity c -> c
-spIdentity = runIdentity . sprun
+spIdentity q = runIdentity (sprun q)
 
 -- Assumes each sub-list is ordered.
 interleaveSort :: (Ord a) => [[a]] -> [a]
