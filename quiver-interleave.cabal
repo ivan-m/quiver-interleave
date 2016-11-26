@@ -1,7 +1,8 @@
 name:                quiver-interleave
 version:             0.2.0.1
 synopsis:            Interleave values from multiple Quivers
-description:         Combine multiple Quivers into one.
+description:         Combine multiple Quivers into one.  Useful when merging
+                     values from multiple source.
 license:             MIT
 license-file:        LICENSE
 author:              Ivan Lazar Miljenovic
