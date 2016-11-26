@@ -44,4 +44,3 @@ test-suite interleave-tests
   default-language:    Haskell2010
 
   ghc-options:         -Wall
-  ghc-prof-options:    -auto
